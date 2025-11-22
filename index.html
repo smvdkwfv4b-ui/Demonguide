@@ -1,0 +1,1761 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#1a0a0a">
+    <meta name="format-detection" content="telephone=no">
+    <title>Твой Готический Демон-Наставник</title>
+    <link rel="manifest" href="manifest.json">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            position: fixed;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(135deg, #1a0a0a 0%, #2d1b1b 100%);
+            color: #e0d5c7;
+            overflow: hidden;
+            margin: 0;
+            padding: 0;
+            width: 100vw;
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+        }
+
+        .app-container {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+        }
+
+        /* Header */
+        .header {
+            background: rgba(20, 10, 10, 0.95);
+            padding: 15px 20px;
+            padding-top: calc(15px + env(safe-area-inset-top));
+            border-bottom: 2px solid #8b0000;
+            box-shadow: 0 4px 20px rgba(139, 0, 0, 0.3);
+            position: relative;
+            z-index: 100;
+            flex-shrink: 0;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .demon-avatar {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #8b0000, #dc143c);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            border: 2px solid #ff4444;
+            box-shadow: 0 0 20px rgba(220, 20, 60, 0.5);
+        }
+
+        .user-info {
+            flex: 1;
+            margin-left: 15px;
+        }
+
+        .user-name {
+            font-size: 18px;
+            font-weight: bold;
+            color: #ff6666;
+        }
+
+        .user-level {
+            font-size: 12px;
+            color: #999;
+        }
+
+        .blood-points {
+            background: rgba(139, 0, 0, 0.3);
+            padding: 8px 15px;
+            border-radius: 20px;
+            border: 1px solid #8b0000;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        /* Navigation Tabs */
+        .nav-tabs {
+            display: flex;
+            background: rgba(30, 15, 15, 0.9);
+            border-bottom: 1px solid #8b0000;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            flex-shrink: 0;
+        }
+
+        .nav-tab {
+            flex: 1;
+            min-width: 80px;
+            padding: 12px 10px;
+            text-align: center;
+            border: none;
+            background: transparent;
+            color: #999;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border-bottom: 3px solid transparent;
+        }
+
+        .nav-tab.active {
+            color: #ff6666;
+            border-bottom-color: #8b0000;
+            background: rgba(139, 0, 0, 0.2);
+        }
+
+        .nav-tab:active {
+            transform: scale(0.95);
+        }
+
+        /* Screen Container */
+        .screen-container {
+            flex: 1;
+            overflow: hidden;
+            position: relative;
+            touch-action: pan-y;
+            min-height: 0;
+        }
+
+        .screen {
+            display: none;
+            height: 100%;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding: 20px;
+            padding-bottom: calc(20px + env(safe-area-inset-bottom));
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .screen.active {
+            display: block;
+            animation: fadeIn 0.3s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateX(20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        /* Demon Message Box */
+        .demon-message {
+            background: linear-gradient(135deg, rgba(139, 0, 0, 0.3), rgba(220, 20, 60, 0.2));
+            border: 2px solid #8b0000;
+            border-radius: 15px;
+            padding: 15px;
+            margin-bottom: 20px;
+            position: relative;
+            box-shadow: 0 4px 15px rgba(139, 0, 0, 0.3);
+        }
+
+        .demon-message::before {
+            content: '👹';
+            position: absolute;
+            top: -15px;
+            left: 15px;
+            font-size: 30px;
+            background: #1a0a0a;
+            padding: 5px;
+            border-radius: 50%;
+        }
+
+        .demon-message p {
+            margin-top: 10px;
+            line-height: 1.6;
+            font-size: 14px;
+        }
+
+        /* Quest Card */
+        .quest-card {
+            background: rgba(40, 20, 20, 0.8);
+            border: 2px solid #8b0000;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 15px;
+            position: relative;
+            transition: all 0.3s;
+        }
+
+        .quest-card:active {
+            transform: scale(0.98);
+            box-shadow: 0 0 20px rgba(139, 0, 0, 0.5);
+        }
+
+        .quest-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .quest-title {
+            font-size: 16px;
+            font-weight: bold;
+            color: #ff6666;
+        }
+
+        .quest-timer {
+            background: rgba(139, 0, 0, 0.5);
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 12px;
+            color: #ffaaaa;
+        }
+
+        .quest-description {
+            font-size: 13px;
+            color: #ccc;
+            margin-bottom: 10px;
+            line-height: 1.4;
+        }
+
+        .quest-hint {
+            font-size: 11px;
+            color: #999;
+            font-style: italic;
+            margin-bottom: 10px;
+            padding: 8px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            border-left: 3px solid #8b0000;
+        }
+
+        .quest-reward {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 10px;
+            border-top: 1px solid rgba(139, 0, 0, 0.3);
+        }
+
+        .reward-text {
+            font-size: 12px;
+            color: #ff9966;
+        }
+
+        .quest-complete-btn {
+            background: linear-gradient(135deg, #8b0000, #dc143c);
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .quest-complete-btn:active {
+            transform: scale(0.95);
+            box-shadow: 0 0 15px rgba(220, 20, 60, 0.5);
+        }
+
+        .quest-complete-btn.completed {
+            background: #333;
+            color: #666;
+        }
+
+        /* Section Headers */
+        .section-header {
+            display: flex;
+            align-items: center;
+            margin: 20px 0 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #8b0000;
+        }
+
+        .section-icon {
+            font-size: 24px;
+            margin-right: 10px;
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #ff6666;
+        }
+
+        /* Input Fields */
+        .input-group {
+            margin-bottom: 15px;
+        }
+
+        .input-label {
+            display: block;
+            font-size: 12px;
+            color: #999;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+        }
+
+        .input-field {
+            width: 100%;
+            background: rgba(40, 20, 20, 0.6);
+            border: 2px solid #8b0000;
+            border-radius: 10px;
+            padding: 12px;
+            color: #e0d5c7;
+            font-size: 14px;
+            font-family: 'Courier New', monospace;
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: #dc143c;
+            box-shadow: 0 0 15px rgba(220, 20, 60, 0.3);
+        }
+
+        /* Buttons */
+        .btn-primary {
+            width: 100%;
+            background: linear-gradient(135deg, #8b0000, #dc143c);
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-bottom: 10px;
+            transition: all 0.3s;
+        }
+
+        .btn-primary:active {
+            transform: scale(0.98);
+            box-shadow: 0 0 20px rgba(220, 20, 60, 0.5);
+        }
+
+        /* Financial Dashboard */
+        .finance-card {
+            background: linear-gradient(135deg, rgba(40, 20, 20, 0.8), rgba(50, 25, 25, 0.8));
+            border: 2px solid #8b0000;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .finance-amount {
+            font-size: 32px;
+            font-weight: bold;
+            color: #ff6666;
+            text-align: center;
+            margin: 10px 0;
+        }
+
+        .finance-label {
+            text-align: center;
+            font-size: 12px;
+            color: #999;
+            text-transform: uppercase;
+        }
+
+        .piggy-bank {
+            background: rgba(40, 20, 20, 0.6);
+            border: 2px solid #8b0000;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        .piggy-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .piggy-name {
+            font-size: 14px;
+            font-weight: bold;
+            color: #ff9966;
+        }
+
+        .piggy-amount {
+            font-size: 14px;
+            color: #66ff66;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #8b0000, #dc143c);
+            transition: width 0.5s;
+            border-radius: 10px;
+        }
+
+        /* Calendar */
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 5px;
+            margin-top: 15px;
+        }
+
+        .calendar-day {
+            aspect-ratio: 1;
+            background: rgba(40, 20, 20, 0.6);
+            border: 1px solid #8b0000;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .calendar-day:active {
+            transform: scale(0.95);
+            background: rgba(139, 0, 0, 0.3);
+        }
+
+        .calendar-day.has-booking {
+            background: linear-gradient(135deg, rgba(139, 0, 0, 0.5), rgba(220, 20, 60, 0.3));
+            border-color: #dc143c;
+        }
+
+        .calendar-day-num {
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .calendar-day-dot {
+            width: 4px;
+            height: 4px;
+            background: #ff6666;
+            border-radius: 50%;
+            margin-top: 2px;
+        }
+
+        /* Rewards */
+        .reward-item {
+            background: rgba(40, 20, 20, 0.6);
+            border: 2px solid #8b0000;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .reward-info {
+            flex: 1;
+        }
+
+        .reward-name {
+            font-size: 14px;
+            font-weight: bold;
+            color: #ff9966;
+            margin-bottom: 5px;
+        }
+
+        .reward-price {
+            font-size: 12px;
+            color: #66ff66;
+        }
+
+        .reward-status {
+            font-size: 12px;
+            color: #999;
+            padding: 5px 10px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+        }
+
+        /* Diary */
+        .diary-entry {
+            background: rgba(40, 20, 20, 0.8);
+            border: 2px solid #8b0000;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        .diary-date {
+            font-size: 12px;
+            color: #999;
+            margin-bottom: 10px;
+        }
+
+        .diary-content {
+            font-size: 14px;
+            line-height: 1.6;
+            color: #e0d5c7;
+        }
+
+        /* Mood Selector */
+        .mood-selector {
+            display: flex;
+            justify-content: space-around;
+            margin: 15px 0;
+        }
+
+        .mood-btn {
+            width: 50px;
+            height: 50px;
+            background: rgba(40, 20, 20, 0.6);
+            border: 2px solid #8b0000;
+            border-radius: 50%;
+            font-size: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .mood-btn:active, .mood-btn.selected {
+            transform: scale(1.1);
+            border-color: #dc143c;
+            box-shadow: 0 0 20px rgba(220, 20, 60, 0.5);
+        }
+
+        /* Bottom Notification */
+        .notification {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #8b0000, #dc143c);
+            color: white;
+            padding: 15px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+            transform: translateY(150%);
+            transition: transform 0.3s;
+            z-index: 1000;
+        }
+
+        .notification.show {
+            transform: translateY(0);
+        }
+
+        /* Quest Tabs */
+        .quest-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .quest-tab-btn {
+            background: rgba(40, 20, 20, 0.6);
+            border: 2px solid #8b0000;
+            color: #999;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 12px;
+            white-space: nowrap;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .quest-tab-btn.active {
+            background: linear-gradient(135deg, rgba(139, 0, 0, 0.5), rgba(220, 20, 60, 0.3));
+            border-color: #dc143c;
+            color: #ff6666;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 2000;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: linear-gradient(135deg, #1a0a0a, #2d1b1b);
+            border: 2px solid #8b0000;
+            border-radius: 15px;
+            padding: 25px;
+            max-width: 500px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-title {
+            font-size: 20px;
+            font-weight: bold;
+            color: #ff6666;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: #999;
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.3);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #8b0000;
+            border-radius: 10px;
+        }
+
+        /* Install Prompt */
+        .install-prompt {
+            position: fixed;
+            bottom: 80px;
+            left: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #8b0000, #dc143c);
+            padding: 15px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+            display: none;
+            z-index: 999;
+        }
+
+        .install-prompt.show {
+            display: block;
+            animation: slideUp 0.3s;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(100px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <div class="header">
+            <div class="header-content">
+                <div class="demon-avatar">😈</div>
+                <div class="user-info">
+                    <div class="user-name">Антон</div>
+                    <div class="user-level">Тату-мастер • Уровень 5</div>
+                </div>
+                <div class="blood-points">
+                    🩸 <span id="bloodPoints">0</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation -->
+        <div class="nav-tabs">
+            <button class="nav-tab active" data-screen="quests">⚔️ Задания</button>
+            <button class="nav-tab" data-screen="finance">💰 Финансы</button>
+            <button class="nav-tab" data-screen="calendar">📅 Записи</button>
+            <button class="nav-tab" data-screen="diary">📔 Дневник</button>
+            <button class="nav-tab" data-screen="rewards">🎁 Награды</button>
+            <button class="nav-tab" data-screen="stats">📊 Статистика</button>
+        </div>
+
+        <!-- Screens Container -->
+        <div class="screen-container">
+            
+            <!-- Quests Screen -->
+            <div class="screen active" id="quests">
+                <div class="demon-message">
+                    <p><strong>Слушай сюда, творец кожных кошмаров!</strong></p>
+                    <p>Я твой личный демон-наставник, и сегодня мы превратим твою жизнь из хаотичного дерьма в организованное дерьмо. Выполняй задания, зарабатывай кровавые очки, и может быть – МОЖЕТ БЫТЬ – ты наконец выползешь из этой финансовой ямы.</p>
+                </div>
+
+                <div class="quest-tabs">
+                    <button class="quest-tab-btn active" data-period="4h">⏰ Каждые 4 часа</button>
+                    <button class="quest-tab-btn" data-period="daily">📅 Ежедневные</button>
+                    <button class="quest-tab-btn" data-period="weekly">📆 Еженедельные</button>
+                </div>
+
+                <div id="questsList">
+                    <!-- Quests will be generated here -->
+                </div>
+            </div>
+
+            <!-- Finance Screen -->
+            <div class="screen" id="finance">
+                <div class="demon-message">
+                    <p><strong>Твои жалкие финансы, смертный!</strong></p>
+                    <p>Давай-ка посмотрим, на что ты спускаешь свои кровные... Надеюсь, не только на игры и татуировочные иглы.</p>
+                </div>
+
+                <div class="finance-card">
+                    <div class="finance-label">💸 Баланс сегодня</div>
+                    <div class="finance-amount"><span id="currentBalance">0</span> zł</div>
+                </div>
+
+                <div class="section-header">
+                    <span class="section-icon">🏺</span>
+                    <span class="section-title">Твои Копилки</span>
+                </div>
+
+                <div id="piggyBanksList">
+                    <!-- Piggy banks will be generated here -->
+                </div>
+
+                <div class="section-header">
+                    <span class="section-icon">💳</span>
+                    <span class="section-title">Добавить Доход</span>
+                </div>
+
+                <div class="input-group">
+                    <label class="input-label">Сумма (zł)</label>
+                    <input type="number" class="input-field" id="incomeAmount" placeholder="0">
+                </div>
+
+                <div class="input-group">
+                    <label class="input-label">Источник</label>
+                    <select class="input-field" id="incomeSource">
+                        <option value="warsaw">💼 Сессия Варшава</option>
+                        <option value="sochaczew">🚗 Сессия Сохачев</option>
+                        <option value="other">💵 Другое</option>
+                    </select>
+                </div>
+
+                <button class="btn-primary" onclick="addIncome()">💰 Распределить Доход</button>
+
+                <div class="section-header">
+                    <span class="section-icon">💸</span>
+                    <span class="section-title">Записать Расход</span>
+                </div>
+
+                <div class="input-group">
+                    <label class="input-label">Сумма (zł)</label>
+                    <input type="number" class="input-field" id="expenseAmount" placeholder="0">
+                </div>
+
+                <div class="input-group">
+                    <label class="input-label">Категория</label>
+                    <select class="input-field" id="expenseCategory">
+                        <option value="rent">🏠 Аренда</option>
+                        <option value="food">🍕 Еда</option>
+                        <option value="transport">🚌 Дорога</option>
+                        <option value="medicine">💊 Лекарства</option>
+                        <option value="doctor">👨‍⚕️ Врач</option>
+                        <option value="debt">📉 Долги</option>
+                        <option value="education">📚 Обучение</option>
+                        <option value="other">💳 Другое</option>
+                    </select>
+                </div>
+
+                <div class="input-group">
+                    <label class="input-label">Заметка (опционально)</label>
+                    <input type="text" class="input-field" id="expenseNote" placeholder="На что потратил?">
+                </div>
+
+                <button class="btn-primary" onclick="addExpense()">💸 Записать Расход</button>
+            </div>
+
+            <!-- Calendar Screen -->
+            <div class="screen" id="calendar">
+                <div class="demon-message">
+                    <p><strong>Твоя книга записей, художник!</strong></p>
+                    <p>Здесь ты отслеживаешь, когда калечишь... то есть украшаешь тела клиентов. Не забывай отмечать город, чтобы я мог подсчитать, сколько ты теряешь на дороге в этот чертов Сохачев.</p>
+                </div>
+
+                <div class="section-header">
+                    <span class="section-icon">📅</span>
+                    <span class="section-title">Ноябрь 2025</span>
+                </div>
+
+                <div class="calendar-grid" id="calendarGrid">
+                    <!-- Calendar will be generated here -->
+                </div>
+
+                <button class="btn-primary" onclick="showBookingModal()">➕ Добавить Запись</button>
+            </div>
+
+            <!-- Diary Screen -->
+            <div class="screen" id="diary">
+                <div class="demon-message">
+                    <p><strong>Время исповеди, грешник!</strong></p>
+                    <p>Расскажи своему демону, как прошел день. И не вздумай врать – я все равно вижу твои шаги и финансы.</p>
+                </div>
+
+                <div class="section-header">
+                    <span class="section-icon">📝</span>
+                    <span class="section-title">Сегодняшняя Запись</span>
+                </div>
+
+                <div class="input-group">
+                    <label class="input-label">Как себя чувствуешь?</label>
+                    <div class="mood-selector">
+                        <button class="mood-btn" data-mood="terrible" onclick="selectMood('terrible')">😭</button>
+                        <button class="mood-btn" data-mood="bad" onclick="selectMood('bad')">😔</button>
+                        <button class="mood-btn" data-mood="okay" onclick="selectMood('okay')">😐</button>
+                        <button class="mood-btn" data-mood="good" onclick="selectMood('good')">🙂</button>
+                        <button class="mood-btn" data-mood="great" onclick="selectMood('great')">😄</button>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label class="input-label">Количество шагов</label>
+                    <input type="number" class="input-field" id="stepsInput" placeholder="Внеси данные с часов">
+                </div>
+
+                <div class="input-group">
+                    <label class="input-label">Что сделал сегодня?</label>
+                    <textarea class="input-field" id="diaryText" rows="5" placeholder="Расскажи о своем дне..."></textarea>
+                </div>
+
+                <div class="input-group">
+                    <label class="input-label">Уровень тревоги (1-10)</label>
+                    <input type="range" class="input-field" id="anxietyLevel" min="1" max="10" value="5">
+                    <div style="text-align: center; color: #ff6666; font-size: 24px; margin-top: 10px;">
+                        <span id="anxietyDisplay">5</span>/10
+                    </div>
+                </div>
+
+                <button class="btn-primary" onclick="saveDiary()">💾 Сохранить Запись</button>
+
+                <div class="section-header">
+                    <span class="section-icon">📖</span>
+                    <span class="section-title">История Записей</span>
+                </div>
+
+                <div id="diaryHistory">
+                    <!-- Diary entries will be shown here -->
+                </div>
+            </div>
+
+            <!-- Rewards Screen -->
+            <div class="screen" id="rewards">
+                <div class="demon-message">
+                    <p><strong>Твой список желаний, жадина!</strong></p>
+                    <p>Здесь ты можешь отметить, какие блага ты хочешь себе купить. Я буду подсчитывать, когда ты сможешь себе это позволить. Спойлер: нескоро.</p>
+                </div>
+
+                <button class="btn-primary" onclick="showAddRewardModal()">🎁 Добавить Награду</button>
+
+                <div id="rewardsList">
+                    <!-- Rewards will be shown here -->
+                </div>
+            </div>
+
+            <!-- Stats Screen -->
+            <div class="screen" id="stats">
+                <div class="demon-message">
+                    <p><strong>Статистика твоих страданий!</strong></p>
+                    <p>Вот как ты продвигаешься к своим целям. Цифры не врут, в отличие от тебя.</p>
+                </div>
+
+                <div class="section-header">
+                    <span class="section-icon">📈</span>
+                    <span class="section-title">Прогресс за Неделю</span>
+                </div>
+
+                <div class="finance-card">
+                    <div class="finance-label">💰 Заработано</div>
+                    <div class="finance-amount"><span id="weekIncome">0</span> zł</div>
+                </div>
+
+                <div class="finance-card">
+                    <div class="finance-label">💸 Потрачено</div>
+                    <div class="finance-amount"><span id="weekExpense">0</span> zł</div>
+                </div>
+
+                <div class="finance-card">
+                    <div class="finance-label">⚔️ Заданий Выполнено</div>
+                    <div class="finance-amount"><span id="questsCompleted">0</span></div>
+                </div>
+
+                <div class="finance-card">
+                    <div class="finance-label">👟 Средние Шаги/День</div>
+                    <div class="finance-amount"><span id="avgSteps">0</span></div>
+                </div>
+
+                <div class="section-header">
+                    <span class="section-icon">🎯</span>
+                    <span class="section-title">Главные Цели</span>
+                </div>
+
+                <div class="piggy-bank">
+                    <div class="piggy-header">
+                        <span class="piggy-name">💰 Финансовая Подушка</span>
+                        <span class="piggy-amount"><span id="cushionAmount">0</span> / 5000 zł</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="cushionProgress" style="width: 0%"></div>
+                    </div>
+                </div>
+
+                <div class="piggy-bank">
+                    <div class="piggy-header">
+                        <span class="piggy-name">📉 Долги</span>
+                        <span class="piggy-amount"><span id="debtPaid">0</span> zł выплачено</span>
+                    </div>
+                </div>
+
+                <button class="btn-primary" onclick="generateWeeklyReport()">📊 Еженедельный Отчет</button>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Booking Modal -->
+    <div class="modal" id="bookingModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="modal-title">Новая Запись</span>
+                <button class="modal-close" onclick="closeModal('bookingModal')">✕</button>
+            </div>
+
+            <div class="input-group">
+                <label class="input-label">Дата</label>
+                <input type="date" class="input-field" id="bookingDate">
+            </div>
+
+            <div class="input-group">
+                <label class="input-label">Время</label>
+                <input type="time" class="input-field" id="bookingTime">
+            </div>
+
+            <div class="input-group">
+                <label class="input-label">Город</label>
+                <select class="input-field" id="bookingCity">
+                    <option value="warsaw">🏙️ Варшава</option>
+                    <option value="sochaczew">🚗 Сохачев</option>
+                </select>
+            </div>
+
+            <div class="input-group">
+                <label class="input-label">Тип клиента</label>
+                <select class="input-field" id="bookingType">
+                    <option value="new">✨ Новый клиент</option>
+                    <option value="returning">🔄 Постоянный клиент</option>
+                </select>
+            </div>
+
+            <div class="input-group">
+                <label class="input-label">Имя клиента</label>
+                <input type="text" class="input-field" id="bookingName" placeholder="Имя">
+            </div>
+
+            <div class="input-group">
+                <label class="input-label">Примерная сумма (zł)</label>
+                <input type="number" class="input-field" id="bookingAmount" placeholder="0">
+            </div>
+
+            <button class="btn-primary" onclick="saveBooking()">💾 Сохранить Запись</button>
+        </div>
+    </div>
+
+    <!-- Add Reward Modal -->
+    <div class="modal" id="addRewardModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="modal-title">Новая Награда</span>
+                <button class="modal-close" onclick="closeModal('addRewardModal')">✕</button>
+            </div>
+
+            <div class="input-group">
+                <label class="input-label">Что хочешь купить?</label>
+                <input type="text" class="input-field" id="rewardName" placeholder="Название награды">
+            </div>
+
+            <div class="input-group">
+                <label class="input-label">Цена (zł)</label>
+                <input type="number" class="input-field" id="rewardPrice" placeholder="0">
+            </div>
+
+            <div class="input-group">
+                <label class="input-label">За какую цель?</label>
+                <select class="input-field" id="rewardGoal">
+                    <option value="weekly">📅 Еженедельная цель</option>
+                    <option value="monthly">📆 Месячная цель</option>
+                    <option value="debt">💰 Выплата долга</option>
+                    <option value="custom">🎯 Особая цель</option>
+                </select>
+            </div>
+
+            <button class="btn-primary" onclick="saveReward()">🎁 Добавить Награду</button>
+        </div>
+    </div>
+
+    <!-- Notification -->
+    <div class="notification" id="notification"></div>
+
+    <!-- Install Prompt -->
+    <div class="install-prompt" id="installPrompt">
+        <div style="margin-bottom: 10px;"><strong>Установи приложение на главный экран!</strong></div>
+        <div style="font-size: 12px; margin-bottom: 10px;">Нажми кнопку "Поделиться" внизу, затем "На экран Домой"</div>
+        <button class="btn-primary" onclick="hideInstallPrompt()" style="margin: 0;">Понятно!</button>
+    </div>
+
+    <script>
+        // Global State
+        let appData = {
+            bloodPoints: 0,
+            balance: 0,
+            piggyBanks: [
+                { id: 'cushion', name: 'Финансовая Подушка', amount: 0, goal: 5000 },
+                { id: 'nextRent', name: 'Следующая Аренда', amount: 0, goal: 3000 },
+                { id: 'debt', name: 'Долги', amount: 0, goal: 0 },
+                { id: 'teeth', name: 'Лечение Зубов', amount: 0, goal: 3000 },
+                { id: 'drawing', name: 'Школа Рисунка', amount: 0, goal: 800 }
+            ],
+            quests: [],
+            bookings: [],
+            diary: [],
+            rewards: [],
+            stats: {
+                weekIncome: 0,
+                weekExpense: 0,
+                questsCompleted: 0,
+                totalSteps: 0,
+                daysRecorded: 0
+            },
+            currentMood: 'okay',
+            lastQuestReset: {
+                '4h': null,
+                'daily': null,
+                'weekly': null
+            }
+        };
+
+        // Initialize
+        window.onload = function() {
+            loadData();
+            initializeQuests();
+            renderAll();
+            setupNotifications();
+            showInstallPromptIfNeeded();
+            startQuestTimer();
+        };
+
+        function loadData() {
+            const saved = localStorage.getItem('gothicLifeAssistant');
+            if (saved) {
+                const parsed = JSON.parse(saved);
+                appData = { ...appData, ...parsed };
+            }
+        }
+
+        function saveData() {
+            localStorage.setItem('gothicLifeAssistant', JSON.stringify(appData));
+        }
+
+        function initializeQuests() {
+            const now = new Date();
+            
+            // 4-hour quests
+            const quests4h = [
+                {
+                    id: 'content_check',
+                    title: 'Проверь Сообщения',
+                    description: 'Проверь Instagram и SMS на новые запросы',
+                    hint: 'Быстрый ответ = больше клиентов',
+                    reward: 10,
+                    period: '4h',
+                    timeLimit: 15,
+                    completed: false
+                },
+                {
+                    id: 'post_dates',
+                    title: 'Пост о Свободных Датах',
+                    description: 'Опубликуй сторис или пост о свободных датах',
+                    hint: 'Используй шаблон: "Свободные даты на этой неделе: [даты]"',
+                    reward: 15,
+                    period: '4h',
+                    timeLimit: 15,
+                    completed: false
+                }
+            ];
+
+            // Daily quests
+            const questsDaily = [
+                {
+                    id: 'sketch_practice',
+                    title: 'Практика Рисунка',
+                    description: 'Поработай над эскизом 2+ часа',
+                    hint: 'Тема дня: Кинжалы и мечи',
+                    reward: 30,
+                    period: 'daily',
+                    timeLimit: 0,
+                    completed: false
+                },
+                {
+                    id: 'stable_diffusion',
+                    title: 'AI Эксперименты',
+                    description: 'Создай 5 референсов в Stable Diffusion',
+                    hint: 'Попробуй новые промпты для черно-белой графики',
+                    reward: 20,
+                    period: 'daily',
+                    timeLimit: 0,
+                    completed: false
+                },
+                {
+                    id: 'promotion_hour',
+                    title: 'Час Продвижения',
+                    description: 'Потрать 1 час на продвижение в соцсетях',
+                    hint: 'Комментируй, лайкай, взаимодействуй с варшавским тату-комьюнити',
+                    reward: 25,
+                    period: 'daily',
+                    timeLimit: 0,
+                    completed: false
+                }
+            ];
+
+            // Weekly quests
+            const questsWeekly = [
+                {
+                    id: 'portfolio_update',
+                    title: 'Обнови Портфолио',
+                    description: 'Добавь 3 лучших работы недели в Instagram',
+                    hint: 'Хорошие фото = больше записей',
+                    reward: 50,
+                    period: 'weekly',
+                    timeLimit: 0,
+                    completed: false
+                },
+                {
+                    id: 'warsaw_promo',
+                    title: 'Варшавское Промо',
+                    description: 'Сделай таргетированную рекламу на Варшаву',
+                    hint: 'Используй ChatGPT для текста объявления',
+                    reward: 60,
+                    period: 'weekly',
+                    timeLimit: 0,
+                    completed: false
+                },
+                {
+                    id: 'weekly_report',
+                    title: 'Еженедельный Отчет',
+                    description: 'Заполни недельную статистику и цели',
+                    hint: 'Это поможет мне (демону) анализировать твой прогресс',
+                    reward: 40,
+                    period: 'weekly',
+                    timeLimit: 0,
+                    completed: false
+                }
+            ];
+
+            // Check if quests need to be reset
+            if (shouldResetQuests('4h')) {
+                appData.quests = appData.quests.filter(q => q.period !== '4h');
+                appData.quests = [...appData.quests, ...quests4h];
+                appData.lastQuestReset['4h'] = now.getTime();
+            }
+
+            if (shouldResetQuests('daily')) {
+                appData.quests = appData.quests.filter(q => q.period !== 'daily');
+                appData.quests = [...appData.quests, ...questsDaily];
+                appData.lastQuestReset['daily'] = now.getTime();
+            }
+
+            if (shouldResetQuests('weekly')) {
+                appData.quests = appData.quests.filter(q => q.period !== 'weekly');
+                appData.quests = [...appData.quests, ...questsWeekly];
+                appData.lastQuestReset['weekly'] = now.getTime();
+            }
+
+            // If no quests at all, add them
+            if (appData.quests.length === 0) {
+                appData.quests = [...quests4h, ...questsDaily, ...questsWeekly];
+                appData.lastQuestReset = {
+                    '4h': now.getTime(),
+                    'daily': now.getTime(),
+                    'weekly': now.getTime()
+                };
+            }
+        }
+
+        function shouldResetQuests(period) {
+            if (!appData.lastQuestReset[period]) return true;
+            
+            const now = new Date();
+            const lastReset = new Date(appData.lastQuestReset[period]);
+            
+            if (period === '4h') {
+                const hours = (now - lastReset) / (1000 * 60 * 60);
+                return hours >= 4;
+            } else if (period === 'daily') {
+                return now.getDate() !== lastReset.getDate();
+            } else if (period === 'weekly') {
+                const days = (now - lastReset) / (1000 * 60 * 60 * 24);
+                return days >= 7;
+            }
+        }
+
+        function startQuestTimer() {
+            // Check every minute for quest resets
+            setInterval(() => {
+                initializeQuests();
+                renderQuests();
+            }, 60000);
+        }
+
+        // Navigation
+        document.querySelectorAll('.nav-tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                const screen = tab.dataset.screen;
+                switchScreen(screen);
+            });
+        });
+
+        function switchScreen(screenName) {
+            // Update tabs
+            document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+            document.querySelector(`[data-screen="${screenName}"]`).classList.add('active');
+            
+            // Update screens
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(screenName).classList.add('active');
+        }
+
+        // Quest tabs
+        document.querySelectorAll('.quest-tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.quest-tab-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                renderQuests(btn.dataset.period);
+            });
+        });
+
+        // Render Functions
+        function renderAll() {
+            renderQuests();
+            renderFinance();
+            renderCalendar();
+            renderDiary();
+            renderRewards();
+            renderStats();
+            updateBloodPoints();
+        }
+
+        function renderQuests(period = '4h') {
+            const questsList = document.getElementById('questsList');
+            const filteredQuests = appData.quests.filter(q => q.period === period);
+            
+            questsList.innerHTML = filteredQuests.map(quest => `
+                <div class="quest-card ${quest.completed ? 'completed' : ''}">
+                    <div class="quest-header">
+                        <div class="quest-title">${quest.title}</div>
+                        ${quest.timeLimit > 0 ? `<div class="quest-timer">⏱️ ${quest.timeLimit} мин</div>` : ''}
+                    </div>
+                    <div class="quest-description">${quest.description}</div>
+                    <div class="quest-hint">💡 ${quest.hint}</div>
+                    <div class="quest-reward">
+                        <div class="reward-text">🩸 +${quest.reward} очков</div>
+                        <button class="quest-complete-btn ${quest.completed ? 'completed' : ''}" 
+                                onclick="completeQuest('${quest.id}')" 
+                                ${quest.completed ? 'disabled' : ''}>
+                            ${quest.completed ? '✓ Готово' : '✓ Выполнено'}
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function completeQuest(questId) {
+            const quest = appData.quests.find(q => q.id === questId);
+            if (quest && !quest.completed) {
+                quest.completed = true;
+                appData.bloodPoints += quest.reward;
+                appData.stats.questsCompleted++;
+                
+                showNotification(`🎉 Задание выполнено! +${quest.reward} кровавых очков!`);
+                saveData();
+                renderQuests();
+                updateBloodPoints();
+                renderStats();
+            }
+        }
+
+        function renderFinance() {
+            document.getElementById('currentBalance').textContent = appData.balance.toFixed(0);
+            
+            const piggyBanksList = document.getElementById('piggyBanksList');
+            piggyBanksList.innerHTML = appData.piggyBanks.map(bank => {
+                const progress = bank.goal > 0 ? (bank.amount / bank.goal * 100).toFixed(0) : 0;
+                return `
+                    <div class="piggy-bank">
+                        <div class="piggy-header">
+                            <span class="piggy-name">${bank.name}</span>
+                            <span class="piggy-amount">${bank.amount.toFixed(0)} ${bank.goal > 0 ? `/ ${bank.goal}` : ''} zł</span>
+                        </div>
+                        ${bank.goal > 0 ? `
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: ${progress}%"></div>
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function addIncome() {
+            const amount = parseFloat(document.getElementById('incomeAmount').value);
+            const source = document.getElementById('incomeSource').value;
+            
+            if (!amount || amount <= 0) {
+                showNotification('⚠️ Введи сумму дохода!');
+                return;
+            }
+
+            // Calculate commission and transport costs
+            let netIncome = amount;
+            if (source === 'warsaw') {
+                netIncome = amount * 0.6; // 40% commission
+            } else if (source === 'sochaczew') {
+                netIncome = amount * 0.7 - 100; // 30% commission + 100 zł transport
+            }
+
+            appData.balance += netIncome;
+            appData.stats.weekIncome += netIncome;
+
+            // Smart distribution
+            const distribution = calculateDistribution(netIncome);
+            showDistributionModal(distribution);
+
+            document.getElementById('incomeAmount').value = '';
+            saveData();
+        }
+
+        function calculateDistribution(income) {
+            const distribution = {};
+            let remaining = income;
+
+            // Priority 1: Next rent if not covered
+            const rentBank = appData.piggyBanks.find(b => b.id === 'nextRent');
+            if (rentBank.amount < rentBank.goal) {
+                const needed = rentBank.goal - rentBank.amount;
+                const toRent = Math.min(needed, remaining * 0.3);
+                distribution['nextRent'] = toRent;
+                remaining -= toRent;
+            }
+
+            // Priority 2: Cushion (if less than goal)
+            const cushionBank = appData.piggyBanks.find(b => b.id === 'cushion');
+            if (cushionBank.amount < cushionBank.goal) {
+                const toCushion = remaining * 0.4;
+                distribution['cushion'] = toCushion;
+                remaining -= toCushion;
+            }
+
+            // Priority 3: Debt (400-700 zł per payment)
+            if (remaining > 400) {
+                const toDebt = Math.min(700, remaining * 0.3);
+                distribution['debt'] = toDebt;
+                remaining -= toDebt;
+            }
+
+            // Priority 4: Drawing school / teeth
+            if (remaining > 0) {
+                const teethBank = appData.piggyBanks.find(b => b.id === 'teeth');
+                const drawingBank = appData.piggyBanks.find(b => b.id === 'drawing');
+                
+                if (drawingBank.amount < drawingBank.goal) {
+                    distribution['drawing'] = remaining * 0.5;
+                    remaining -= distribution['drawing'];
+                }
+                
+                if (remaining > 0 && teethBank.amount < teethBank.goal) {
+                    distribution['teeth'] = remaining;
+                }
+            }
+
+            return distribution;
+        }
+
+        function showDistributionModal(distribution) {
+            let message = '💰 Рекомендую распределить так:\n\n';
+            for (const [bankId, amount] of Object.entries(distribution)) {
+                const bank = appData.piggyBanks.find(b => b.id === bankId);
+                message += `${bank.name}: ${amount.toFixed(0)} zł\n`;
+                bank.amount += amount;
+            }
+            
+            showNotification(message);
+            renderFinance();
+            saveData();
+        }
+
+        function addExpense() {
+            const amount = parseFloat(document.getElementById('expenseAmount').value);
+            const category = document.getElementById('expenseCategory').value;
+            const note = document.getElementById('expenseNote').value;
+            
+            if (!amount || amount <= 0) {
+                showNotification('⚠️ Введи сумму расхода!');
+                return;
+            }
+
+            appData.balance -= amount;
+            appData.stats.weekExpense += amount;
+
+            // Record expense
+            appData.expenses = appData.expenses || [];
+            appData.expenses.push({
+                amount,
+                category,
+                note,
+                date: new Date().toISOString()
+            });
+
+            showNotification(`💸 Расход записан: ${amount} zł`);
+            
+            document.getElementById('expenseAmount').value = '';
+            document.getElementById('expenseNote').value = '';
+            
+            saveData();
+            renderFinance();
+        }
+
+        function renderCalendar() {
+            const grid = document.getElementById('calendarGrid');
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = now.getMonth();
+            
+            const firstDay = new Date(year, month, 1).getDay();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            
+            let html = '';
+            
+            // Week day headers
+            ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'].forEach(day => {
+                html += `<div class="calendar-day" style="font-weight: bold; background: rgba(139,0,0,0.2)">${day}</div>`;
+            });
+            
+            // Empty cells
+            for (let i = 1; i < firstDay; i++) {
+                html += '<div class="calendar-day"></div>';
+            }
+            
+            // Days
+            for (let day = 1; day <= daysInMonth; day++) {
+                const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                const hasBooking = appData.bookings.some(b => b.date === dateStr);
+                
+                html += `
+                    <div class="calendar-day ${hasBooking ? 'has-booking' : ''}" onclick="showDayDetails('${dateStr}')">
+                        <div class="calendar-day-num">${day}</div>
+                        ${hasBooking ? '<div class="calendar-day-dot"></div>' : ''}
+                    </div>
+                `;
+            }
+            
+            grid.innerHTML = html;
+        }
+
+        function showBookingModal() {
+            document.getElementById('bookingModal').classList.add('active');
+            document.getElementById('bookingDate').value = new Date().toISOString().split('T')[0];
+        }
+
+        function saveBooking() {
+            const date = document.getElementById('bookingDate').value;
+            const time = document.getElementById('bookingTime').value;
+            const city = document.getElementById('bookingCity').value;
+            const type = document.getElementById('bookingType').value;
+            const name = document.getElementById('bookingName').value;
+            const amount = parseFloat(document.getElementById('bookingAmount').value);
+            
+            if (!date || !time || !name) {
+                showNotification('⚠️ Заполни все поля!');
+                return;
+            }
+
+            appData.bookings.push({
+                date,
+                time,
+                city,
+                type,
+                name,
+                amount,
+                id: Date.now()
+            });
+
+            showNotification(`✓ Запись добавлена: ${name} на ${date}`);
+            closeModal('bookingModal');
+            renderCalendar();
+            saveData();
+        }
+
+        function renderDiary() {
+            const history = document.getElementById('diaryHistory');
+            const recent = appData.diary.slice(-7).reverse();
+            
+            history.innerHTML = recent.map(entry => `
+                <div class="diary-entry">
+                    <div class="diary-date">${new Date(entry.date).toLocaleDateString('ru-RU')} • Настроение: ${getMoodEmoji(entry.mood)} • Тревога: ${entry.anxiety}/10</div>
+                    <div class="diary-content">${entry.text}</div>
+                    ${entry.steps ? `<div style="margin-top: 10px; color: #999; font-size: 12px;">👟 Шагов: ${entry.steps}</div>` : ''}
+                </div>
+            `).join('');
+        }
+
+        function selectMood(mood) {
+            appData.currentMood = mood;
+            document.querySelectorAll('.mood-btn').forEach(btn => btn.classList.remove('selected'));
+            document.querySelector(`[data-mood="${mood}"]`).classList.add('selected');
+        }
+
+        function saveDiary() {
+            const text = document.getElementById('diaryText').value;
+            const anxiety = parseInt(document.getElementById('anxietyLevel').value);
+            const steps = parseInt(document.getElementById('stepsInput').value) || 0;
+            
+            if (!text) {
+                showNotification('⚠️ Напиши хоть что-нибудь!');
+                return;
+            }
+
+            appData.diary.push({
+                date: new Date().toISOString(),
+                mood: appData.currentMood,
+                text,
+                anxiety,
+                steps
+            });
+
+            if (steps > 0) {
+                appData.stats.totalSteps += steps;
+                appData.stats.daysRecorded++;
+            }
+
+            showNotification('💾 Запись сохранена!');
+            
+            document.getElementById('diaryText').value = '';
+            document.getElementById('stepsInput').value = '';
+            renderDiary();
+            renderStats();
+            saveData();
+        }
+
+        function renderRewards() {
+            const list = document.getElementById('rewardsList');
+            
+            if (appData.rewards.length === 0) {
+                list.innerHTML = '<div class="demon-message"><p>Пока нет наград. Добавь что-нибудь, что хочешь купить!</p></div>';
+                return;
+            }
+
+            list.innerHTML = appData.rewards.map(reward => {
+                const canAfford = appData.balance >= reward.price;
+                return `
+                    <div class="reward-item">
+                        <div class="reward-info">
+                            <div class="reward-name">${reward.name}</div>
+                            <div class="reward-price">${reward.price} zł</div>
+                        </div>
+                        <div class="reward-status">
+                            ${canAfford ? '✓ Можешь купить!' : `Еще ${(reward.price - appData.balance).toFixed(0)} zł`}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function showAddRewardModal() {
+            document.getElementById('addRewardModal').classList.add('active');
+        }
+
+        function saveReward() {
+            const name = document.getElementById('rewardName').value;
+            const price = parseFloat(document.getElementById('rewardPrice').value);
+            const goal = document.getElementById('rewardGoal').value;
+            
+            if (!name || !price) {
+                showNotification('⚠️ Заполни все поля!');
+                return;
+            }
+
+            appData.rewards.push({ name, price, goal, id: Date.now() });
+            
+            showNotification('🎁 Награда добавлена!');
+            closeModal('addRewardModal');
+            renderRewards();
+            saveData();
+        }
+
+        function renderStats() {
+            document.getElementById('weekIncome').textContent = appData.stats.weekIncome.toFixed(0);
+            document.getElementById('weekExpense').textContent = appData.stats.weekExpense.toFixed(0);
+            document.getElementById('questsCompleted').textContent = appData.stats.questsCompleted;
+            
+            const avgSteps = appData.stats.daysRecorded > 0 
+                ? Math.round(appData.stats.totalSteps / appData.stats.daysRecorded)
+                : 0;
+            document.getElementById('avgSteps').textContent = avgSteps;
+
+            // Update goal progress
+            const cushion = appData.piggyBanks.find(b => b.id === 'cushion');
+            document.getElementById('cushionAmount').textContent = cushion.amount.toFixed(0);
+            document.getElementById('cushionProgress').style.width = `${(cushion.amount / cushion.goal * 100).toFixed(0)}%`;
+
+            const debt = appData.piggyBanks.find(b => b.id === 'debt');
+            document.getElementById('debtPaid').textContent = debt.amount.toFixed(0);
+        }
+
+        function updateBloodPoints() {
+            document.getElementById('bloodPoints').textContent = appData.bloodPoints;
+        }
+
+        // Utility Functions
+        function showNotification(message) {
+            const notif = document.getElementById('notification');
+            notif.textContent = message;
+            notif.classList.add('show');
+            setTimeout(() => notif.classList.remove('show'), 3000);
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+        }
+
+        function getMoodEmoji(mood) {
+            const moods = {
+                terrible: '😭',
+                bad: '😔',
+                okay: '😐',
+                good: '🙂',
+                great: '😄'
+            };
+            return moods[mood] || '😐';
+        }
+
+        // Anxiety slider
+        document.getElementById('anxietyLevel').addEventListener('input', (e) => {
+            document.getElementById('anxietyDisplay').textContent = e.target.value;
+        });
+
+        // Notifications
+        function setupNotifications() {
+            if ('Notification' in window && Notification.permission === 'default') {
+                Notification.requestPermission();
+            }
+        }
+
+        function showInstallPromptIfNeeded() {
+            // Show install prompt on iOS if not installed
+            const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent);
+            const isStandalone = window.navigator.standalone;
+            
+            if (isIOS && !isStandalone) {
+                setTimeout(() => {
+                    document.getElementById('installPrompt').classList.add('show');
+                }, 3000);
+            }
+        }
+
+        function hideInstallPrompt() {
+            document.getElementById('installPrompt').classList.remove('show');
+        }
+
+        function generateWeeklyReport() {
+            const report = `
+                📊 ЕЖЕНЕДЕЛЬНЫЙ ОТЧЕТ
+                
+                💰 Финансы:
+                - Заработано: ${appData.stats.weekIncome.toFixed(0)} zł
+                - Потрачено: ${appData.stats.weekExpense.toFixed(0)} zł
+                - Баланс: ${appData.balance.toFixed(0)} zł
+                
+                ⚔️ Задания:
+                - Выполнено: ${appData.stats.questsCompleted}
+                - Кровавых очков: ${appData.bloodPoints}
+                
+                🎯 Прогресс к целям:
+                - Финподушка: ${appData.piggyBanks[0].amount.toFixed(0)} / 5000 zł
+                - Долги: ${appData.piggyBanks[2].amount.toFixed(0)} zł выплачено
+                
+                👟 Активность:
+                - Средние шаги: ${appData.stats.daysRecorded > 0 ? Math.round(appData.stats.totalSteps / appData.stats.daysRecorded) : 0}
+                
+                Продолжай в том же духе, смертный!
+            `;
+            
+            showNotification('📊 Отчет сгенерирован!');
+            alert(report);
+        }
+
+        function showDayDetails(dateStr) {
+            const bookings = appData.bookings.filter(b => b.date === dateStr);
+            if (bookings.length > 0) {
+                const details = bookings.map(b => 
+                    `${b.time} - ${b.name} (${b.city === 'warsaw' ? 'Варшава' : 'Сохачев'})`
+                ).join('\n');
+                alert(`📅 ${dateStr}\n\n${details}`);
+            }
+        }
+
+        // Service Worker Registration
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js').catch(() => {
+                // Service worker registration failed silently
+            });
+        }
+    </script>
+</body>
+</html>
