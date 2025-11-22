@@ -2,7 +2,8 @@
   "name": "Готический Демон-Наставник",
   "short_name": "Демон-Гайд",
   "description": "Твой личный демон для управления жизнью, финансами и карьерой",
-  "start_url": "/gothic-life-assistant.html",
+  "start_url": "start_url": "./",
+  "scope": "./"
   "display": "standalone",
   "background_color": "#1a0a0a",
   "theme_color": "#8b0000",
